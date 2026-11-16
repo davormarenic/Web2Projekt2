@@ -1,0 +1,41 @@
+{
+  "name": "web2-projekt2",
+  "version": "1.0.0",
+  "description": "WEB2 Drugi projekt - XSS i Broken Access Control",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "clean": "shx rm -rf dist",
+    "copy-files": "shx cp -r src/views dist/ && shx cp -r src/public dist/",
+    "build": "npm run clean && tsc && npm run copy-files",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "pg": "^8.13.1",
+    "pug": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.0",
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "shx": "^0.3.4",
+    "typescript": "^5.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davormarenic/Web2Projekt2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davormarenic/Web2Projekt2/issues"
+  },
+  "homepage": "https://github.com/davormarenic/Web2Projekt2#readme"
+}

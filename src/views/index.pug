@@ -1,0 +1,192 @@
+doctype html
+html(lang="hr")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title WEB2 - Drugi projekt (JMBAG: 0036541989)
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    .container
+      header.header
+        h1 Drugi projekt — Sigurnost web-aplikacija
+        p.subtitle Student: 0036541989 | Ranjivosti: Pohranjeni XSS i Loša kontrola pristupa (Broken Access Control)
+
+      if message
+        .alert.alert-success= message
+      if error
+        .alert.alert-error= error
+
+      //- KARTICA ZA PRIJAVU KORISNIKA
+      section.card
+        h2 Korisnička sjednica (Autentifikacija)
+        p.instructions
+          | Testni računi u bazi: 
+          code admin / admin123
+          |  (ID: 1, uloga: admin), 
+          code pero / pero123
+          |  (ID: 2, uloga: user), 
+          code ana / ana123
+          |  (ID: 3, uloga: user).
+
+        if user
+          .user-bar
+            span
+              | Prijavljeni ste kao: 
+              strong #{user.username}
+              |  (ID: #{user.id}, uloga: 
+              span.badge= user.role
+              | )
+            form(action="/logout", method="POST", style="display:inline;")
+              button.btn.btn-secondary(type="submit") Odjava
+        else
+          form.inline-form(action="/login", method="POST")
+            input(type="text", name="username", placeholder="Korisničko ime (npr. pero)", required)
+            input(type="password", name="password", placeholder="Lozinka (npr. pero123)", required)
+            button.btn.btn-primary(type="submit") Prijava
+
+      //- 1. RANJIVOST: POHRANJENI XSS
+      section.card
+        .card-header
+          h2 1. Cross-site scripting (Pohranjeni XSS)
+          span(class=settings.xss ? 'status-badge vuln-on' : 'status-badge vuln-off')
+            = settings.xss ? 'RANJIVOST UKLJUČENA' : 'RANJIVOST ISKLJUČENA (ZAŠTIĆENO)'
+
+        p.instructions
+          strong Upute za testiranje: 
+          | Unesite komentar na oglasnu ploču. Kada je ranjivost uključena, komentar se u Pug predlošku ispisuje neeskepirano (
+          code != c.content
+          | ), a demonstracijski kolačić 
+          code session_info
+          |  nema 
+          code HttpOnly
+          |  zastavicu. Kopirajte i pošaljite sljedeći payload za prikaz kolačića sjednice:
+          br
+          code.payload &lt;script&gt;alert('XSS! Kolačić: ' + document.cookie)&lt;/script&gt;
+          br
+          | Kada isključite prekidač, isti komentar ispisuje se sigurno kao kodirani tekst (
+          code = c.content
+          | ), a kolačić dobiva 
+          code HttpOnly: true
+          | .
+
+        form.toggle-form(action="/toggle", method="POST")
+          input(type="hidden", name="vulnType", value="xss")
+          label.checkbox-label
+            input(
+              type="checkbox",
+              name="enabled",
+              value="true",
+              checked=settings.xss,
+              onchange="this.form.submit()"
+            )
+            span Ranjivost uključena (Pohranjeni XSS)
+
+        form.comment-form(action="/comment", method="POST")
+          label(for="content") Novi komentar na oglasnoj ploči:
+          textarea#content(name="content", rows="3", placeholder="Upišite poruku ili XSS payload...", required)
+          button.btn.btn-primary(type="submit") Objavi komentar
+
+        h3 Objavljeni komentari:
+        if comments.length === 0
+          p.muted Nema objavljenih komentara.
+        else
+          ul.comment-list
+            each c in comments
+              li.comment-item
+                .comment-meta
+                  strong #{c.author}
+                  form(action=`/comment/delete/${c.id}`, method="POST", style="display:inline;")
+                    button.btn-delete(type="submit", title="Obriši komentar") Obriši
+                .comment-body
+                  if settings.xss
+                    != c.content
+                  else
+                    = c.content
+
+      //- 2. RANJIVOST: LOŠA KONTROLA PRISTUPA (BROKEN ACCESS CONTROL)
+      section.card
+        .card-header
+          h2 2. Loša kontrola pristupa (Broken Access Control — IDOR i Admin ruta)
+          span(class=settings.bac ? 'status-badge vuln-on' : 'status-badge vuln-off')
+            = settings.bac ? 'RANJIVOST UKLJUČENA' : 'RANJIVOST ISKLJUČENA (ZAŠTIĆENO)'
+
+        p.instructions
+          strong Upute za testiranje: 
+          | Prijavite se kao običan korisnik (npr. 
+          code pero / pero123
+          | , čiji je ID = 2) ili ostanite neprijavljeni.
+          br
+          strong 1) IDOR napad: 
+          | Zatražite profil s 
+          code userId=1
+          |  (admin) ili 
+          code userId=3
+          |  (ana). Kada je ranjivost uključena, poslužitelj ne provjerava vlasništvo i prikazuje tuđe tajne podatke (OIB, IBAN, PIN).
+          br
+          strong 2) Neovlašteni pristup administratorskoj ruti: 
+          | Kliknite na 
+          code Dohvati sve korisnike (/admin/users)
+          | . Kada je ranjivost isključena, poslužitelj vraća 
+          code 401 Unauthorized
+          |  (neprijavljeni) ili 
+          code 403 Forbidden
+          |  (korisnici bez uloge admin).
+
+        form.toggle-form(action="/toggle", method="POST")
+          input(type="hidden", name="vulnType", value="bac")
+          label.checkbox-label
+            input(
+              type="checkbox",
+              name="enabled",
+              value="true",
+              checked=settings.bac,
+              onchange="this.form.submit()"
+            )
+            span Ranjivost uključena (Broken Access Control)
+
+        .bac-actions
+          form.inline-form(action="/profile", method="GET")
+            label(for="userId") Dohvati privatni profil za userId:
+            input#userId(type="number", name="userId", value="1", min="1", max="10", required)
+            button.btn.btn-primary(type="submit") Dohvati profil (/profile)
+
+          a.btn.btn-warning(href="/admin/users") Dohvati sve korisnike (/admin/users)
+
+        if profileResult
+          .result-box
+            h3 Dohvaćeni privatni profil (ID: #{profileResult.id})
+            ul
+              li
+                strong Korisničko ime: 
+                | #{profileResult.username}
+              li
+                strong Uloga: 
+                | #{profileResult.role}
+              li
+                strong E-pošta: 
+                | #{profileResult.email}
+              li
+                strong Tajni zapis: 
+                span.secret-text #{profileResult.secret_note}
+
+        if adminUsers
+          .result-box
+            h3 Administratorski popis svih korisnika (/admin/users)
+            table.users-table
+              thead
+                tr
+                  th ID
+                  th Korisničko ime
+                  th Lozinka
+                  th Uloga
+                  th E-pošta
+                  th Tajni zapis
+              tbody
+                each u in adminUsers
+                  tr
+                    td= u.id
+                    td= u.username
+                    td= u.password
+                    td= u.role
+                    td= u.email
+                    td.secret-text= u.secret_note
