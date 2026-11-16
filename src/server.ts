@@ -53,7 +53,7 @@ app.set('trust proxy', 1);
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'tajni_kljuc_za_web2_projekt2_0036541989',
+    secret: process.env.SESSION_SECRET || 'tajni_kljuc_za_web2_projekt2',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -73,8 +73,8 @@ async function loadVulnSettings(
     req.vulnSettings = settings;
 
     const cookiePayload = req.session.user
-      ? `user=${req.session.user.username}|role=${req.session.user.role}|jmbag=0036541989`
-      : 'guest=anon|jmbag=0036541989';
+      ? `user=${req.session.user.username}|role=${req.session.user.role}|session=active`
+      : 'guest=anon|session=active';
 
     res.cookie('session_info', cookiePayload, {
       httpOnly: !settings.xss,
