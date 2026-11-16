@@ -3,13 +3,13 @@ html(lang="hr")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title WEB2 - Drugi projekt Davor Marenić
+    title WEB2 - Drugi projekt
     link(rel="stylesheet", href="/css/style.css")
   body
     .container
       header.header
         h1 Drugi projekt — Sigurnost web-aplikacija
-        p.subtitle Student: Davor Marenić | Ranjivosti: Pohranjeni XSS i Loša kontrola pristupa (Broken Access Control)
+        p.subtitle Ranjivosti: Pohranjeni XSS i Loša kontrola pristupa (Broken Access Control)
 
       if message
         .alert.alert-success= message
@@ -19,14 +19,6 @@ html(lang="hr")
       //- KARTICA ZA PRIJAVU KORISNIKA
       section.card
         h2 Korisnička sjednica (Autentifikacija)
-        p.instructions
-          | Testni računi u bazi: 
-          code admin / admin123
-          |  (ID: 1, uloga: admin), 
-          code pero / pero123
-          |  (ID: 2, uloga: user), 
-          code ana / ana123
-          |  (ID: 3, uloga: user).
 
         if user
           .user-bar
@@ -40,8 +32,8 @@ html(lang="hr")
               button.btn.btn-secondary(type="submit") Odjava
         else
           form.inline-form(action="/login", method="POST")
-            input(type="text", name="username", placeholder="Korisničko ime (npr. pero)", required)
-            input(type="password", name="password", placeholder="Lozinka (npr. pero123)", required)
+            input(type="text", name="username", placeholder="Korisničko ime", required)
+            input(type="password", name="password", placeholder="Lozinka", required)
             button.btn.btn-primary(type="submit") Prijava
 
       //- 1. RANJIVOST: POHRANJENI XSS
@@ -112,16 +104,14 @@ html(lang="hr")
 
         p.instructions
           strong Upute za testiranje: 
-          | Prijavite se kao običan korisnik (npr. 
-          code pero / pero123
-          | , čiji je ID = 2) ili ostanite neprijavljeni.
+          | Prijavite se kao običan korisnik (ID = 2) ili ostanite neprijavljeni.
           br
           strong 1) IDOR napad: 
           | Zatražite profil s 
           code userId=1
           |  (admin) ili 
           code userId=3
-          |  (ana). Kada je ranjivost uključena, poslužitelj ne provjerava vlasništvo i prikazuje tuđe tajne podatke (OIB, IBAN, PIN).
+          | . Kada je ranjivost uključena, poslužitelj ne provjerava vlasništvo i prikazuje tuđe tajne podatke (OIB, IBAN, PIN).
           br
           strong 2) Neovlašteni pristup administratorskoj ruti: 
           | Kliknite na 
